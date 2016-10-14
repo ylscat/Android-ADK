@@ -1,0 +1,39 @@
+<manifest package="com.fangstar.keystore"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-feature android:name="android.hardware.usb.accessory" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity android:name=".Test"
+            android:screenOrientation="reverseLandscape"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--<intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" />-->
+        </activity>
+
+        <receiver android:name=".adk.AccessoryManager">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_DETACHED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
