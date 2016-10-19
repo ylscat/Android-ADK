@@ -6,4 +6,7 @@
     <color name="text">#333</color>
     <color name="gray">#888</color>
     <color name="blue">#3F51B5</color>
+    <color name="red">#ff6666</color>
+    <color name="orange">#ff8800</color>
+    <color name="green">#338833</color>
 </resources>

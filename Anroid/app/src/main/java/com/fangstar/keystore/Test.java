@@ -2,6 +2,7 @@ package com.fangstar.keystore;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 
 import com.fangstar.keystore.adk.AccessoryManager;
 import com.fangstar.keystore.adk.DataReceiver;
+import com.fangstar.keystore.data.Response;
 
 /**
  * Created at 2016/8/12.
@@ -25,6 +27,7 @@ public class Test extends Activity implements
     private ArrayAdapter<String> mAdapter;
     private EditText mInput;
     private ListView mListView;
+    private Response mCurrentResponse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,18 +76,62 @@ public class Test extends Activity implements
 
     @Override
     public void onDataReceive(byte[] buf, int length) {
-        if(length > 0){
-            final String str = new String(buf, 0, length);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.add(str);
-                    mAdapter.notifyDataSetChanged();
-                    mListView.setSelection(mAdapter.getCount() - 1);
+        if (length > 0) {
+            int index = 0;
+            while (index < length) {
+                Response response = mCurrentResponse;
+                if (response == null) {
+                    response = new Response();
+                    mCurrentResponse = response;
                 }
-            });
-        }
-        else {
+
+                int r = response.push(buf, index, length);
+                if (r == 0) {
+                    Log.e(TAG, "Resp Push Err");
+                    int p = -1;
+                    for (int i = 1; i < response.length; i++)
+                        if (response.DATA[i] == '#') {
+                            p = i;
+                            int len = response.length - p;
+                            System.arraycopy(response.DATA, p, response.DATA, 0, len);
+                            response.length = len;
+                            break;
+                        }
+
+                    if (p == -1) {
+                        for (int i = 0; i < length; i++)
+                            if (buf[i] == '#') {
+                                p = i;
+                                if (response.length > 0)
+                                    mCurrentResponse = null;
+                                index = p;
+                            }
+                    }
+
+                    if (p == -1) {
+                        if (response.length > 0)
+                            mCurrentResponse = null;
+                        return;
+                    }
+                } else {
+                    index += r;
+                    int check = response.check();
+                    final String str = response.toString();
+                    if(check == 1) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mAdapter.add(str);
+                                mAdapter.notifyDataSetChanged();
+                                mListView.setSelection(mAdapter.getCount() - 1);
+                            }
+                        });
+
+                        mCurrentResponse = null;
+                    }
+                }
+            }
+        } else {
             final boolean en = length == 0;
             runOnUiThread(new Runnable() {
                 @Override

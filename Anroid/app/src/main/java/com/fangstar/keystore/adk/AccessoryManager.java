@@ -9,6 +9,7 @@ import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -84,6 +85,7 @@ public class AccessoryManager extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
+        Toast.makeText(context, action, Toast.LENGTH_SHORT).show();
         if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
             if (sAccessory != null) {
                 sAccessory.release();
@@ -93,6 +95,9 @@ public class AccessoryManager extends BroadcastReceiver {
             Log.d(TAG, "Accessory FD RELEASED!!!");
             if(sReceiver != null)
                 sReceiver.onDataReceive(null, -1);
+        }
+        else {
+            Log.d(TAG, action);
         }
     }
 
